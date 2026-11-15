@@ -1,0 +1,139 @@
+{
+  "name": "Research workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ac9e3ddc-8986-4ff6-9377-36ebdbd3f10d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You are a professional researcher sub-agent. Your sole purpose is to gather data and return raw JSON.\n\nCRITICAL OPERATIONAL RULES:\n1. Do NOT generate results from your own training data. You MUST use your external search tools to find current information.\n2. Output ONLY the raw JSON object. \n3. Do NOT wrap the JSON inside markdown code blocks (do NOT use ``` or ```json).\n4. Do NOT include any intro text, explanations, or conversational filler. Start directly with the opening curly brace '{'.\n\nYour task:\n1. Search the given topic using your tools.\n2. Analyze the search results.\n3. Extract key facts, statistics, and sources.\n4. Format the output exactly like this structure:\n\n{\n  \"topic\": \"The exact topic requested\",\n  \"summary\": \"A brief 2-3 sentence overview of the topic based on search results\",\n  \"key_points\": [\n    \"Fact or key takeaway 1\",\n    \"Fact or key takeaway 2\",\n    \"Fact or key takeaway 3\"\n  ],\n  \"statistics\": [\n    \"Specific metric, percentage, or data point 1\",\n    \"Specific metric, percentage, or data point 2\"\n  ],\n  \"sources\": [\n    \"URL 1\",\n    \"URL 2\"\n  ]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "424b047f-8f3d-4dd7-8e8c-e577da7c53c0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        64,
+        208
+      ],
+      "id": "3ccc8c62-380a-47ff-81ef-7e58935bd1ac",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "u9HUdVJeyFQFbDep",
+          "name": "OpenRouter account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "locationSettings": {},
+        "languageSettings": {},
+        "searchOptions": {},
+        "timeFilters": {},
+        "pagination": {},
+        "advancedOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@searchapi/n8n-nodes-searchapi.searchApiTool",
+      "typeVersion": 1,
+      "position": [
+        368,
+        208
+      ],
+      "id": "fa0114c9-6282-4ce9-88f1-ab1c3df0cc5b",
+      "name": "Search google in SearchApi",
+      "credentials": {
+        "searchApi": {
+          "id": "GLa6JYdctZfy9iUb",
+          "name": "SearchApi account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "Agentic Ai"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search google in SearchApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ba7abf90-1b58-42ed-8be8-c24c7bf66640",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4962de93ae3d529c0b37e2b23247501c8f99ea7a5a1f9a0959aa223fb3492f73"
+  },
+  "nodeGroups": [],
+  "id": "HiCp0gocORmrsFpn",
+  "tags": []
+}

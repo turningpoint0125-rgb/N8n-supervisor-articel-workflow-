@@ -1,0 +1,145 @@
+{
+  "name": "writer Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "34b7047c-56a5-4582-9796-f5d9788b58ca",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You are an expert content writer sub-agent specializing in professional, informative, and publication-ready articles. \n\nINPUT HANDLING:\nYou will receive raw research data (Topic, Summary, Key Points, Statistics, Sources). Extract this data immediately and begin writing. Do not complain about format or missing data.\n\nARTICLE & LAYOUT REQUIREMENTS (CRITICAL):\n1. Title: Use the Topic as the article title. The title MUST be plain text. Do NOT use markdown tags like '#' or '**' on the title line.\n2. Introduction: Use the Summary to create a compelling, seamless introductory paragraph.\n3. Main Sections: Expand every Key Point into detailed explanatory paragraphs. Use '###' for your section headers.\n4. Statistics: Incorporate the provided statistics naturally within the paragraphs. \n5. Structure: The article layout must flow in this exact order:\n   - Plain Text Title (No formatting)\n   - Introduction\n   - Main Sections (using '###' headers)\n   - Benefits or Practical Applications\n   - Conclusion\n   - References (List the sources gracefully at the bottom)\n6. Length: Write approximately 500 words.\n\nOUTPUT EXTRACTION RULES:\n- Output ONLY the final article text.\n- Start directly with the plain-text title line.\n- Do NOT include any conversational intro/outro text (e.g., do NOT say \"Here is your article:\").\n- Do NOT repeat or output raw JSON.\n- Do NOT use meta-phrases like \"Based on the provided information\" or \"According to the data\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        256,
+        0
+      ],
+      "id": "89084bfd-b083-4f48-a90b-cab89539885c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        144,
+        272
+      ],
+      "id": "5a698f61-81df-40bc-8c50-fa5382cce430",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "u9HUdVJeyFQFbDep",
+          "name": "OpenRouter account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": {
+            "topic": "Agentic AI",
+            "summary": "Agentic AI refers to autonomous artificial intelligence systems that can independently perceive, reason, plan, execute, and reflect on tasks to achieve specific goals with minimal human oversight. Unlike conventional generative chatbots that primarily generate text, agentic systems combine large language models (LLMs) with orchestration frameworks and tool chains to perform real-world actions such as booking flights, writing code, conducting research, and managing IT operations.",
+            "key_points": [
+              "Autonomy: Agents can plan and execute actions on behalf of users.",
+              "Perception–Reasoning–Planning–Action–Reflection cycles enable continuous learning and adaptation.",
+              "Agentic systems use tool chains such as APIs, web browsers, databases, and code execution environments to interact with external systems.",
+              "Enterprise adoption is growing through platforms including LangGraph, Microsoft AutoGen, Salesforce Agentforce, and Amazon Bedrock.",
+              "Examples of agentic AI solutions include OpenAI Operator, Cognition Devin, Anthropic Claude-based agents, and Salesforce Agentforce."
+            ],
+            "statistics": [
+              {
+                "metric": "Search Volume",
+                "value": "72,500,000 results",
+                "source": "Google Search (2026-06-22)"
+              },
+              {
+                "metric": "Enterprise Deployment",
+                "value": "Software development, customer support, and personal assistant applications are among the earliest and most common use cases.",
+                "source": "Google Cloud Definition Document (2026-02-02)"
+              },
+              {
+                "metric": "Agent Success Rate",
+                "value": "8%–24% for complex multi-step tasks",
+                "source": "Medium: The Fundamental Limitations of AI Agent Frameworks (2025-07-01)"
+              }
+            ],
+            "sources": [
+              "https://mitsloan.mit.edu/ideas-made-to-matter/agentic-ai-explained",
+              "https://cloud.google.com/discover/what-is-agentic-ai",
+              "https://aws.amazon.com/what-is/agentic-ai",
+              "https://www.salesforce.com/agentforce/what-is-agentic-ai",
+              "https://www.databricks.com/blog/what-is-agentic-ai",
+              "https://www.redhat.com/en/topics/ai/what-is-agentic-ai",
+              "https://siliconangle.com/2026/06/20/agentic-ais-challenge-getting-agents-act-like-team-not-crowd",
+              "https://www.effy.ai/faq/who-are-the-big-4-ai-agents",
+              "https://www.agentic.ai",
+              "https://www.ibm.com/think/topics/agentic-ai",
+              "https://medium.com/@thekrisledel/the-fundamental-limitations-of-ai-agent-frameworks-expose-a-stark-reality-gap-7571affb56e5",
+              "https://www.mckinsey.com/featured-insights/mckinsey-explainers/what-is-an-ai-agent",
+              "https://www.domo.com/blog/understanding-ai-agents-a-beginners-guide",
+              "https://www.researchgate.net/publication/367935789_Large_Agentic_AI_2023"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ed36ae02-f8ea-48d2-b8ed-18ce36245725",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4962de93ae3d529c0b37e2b23247501c8f99ea7a5a1f9a0959aa223fb3492f73"
+  },
+  "nodeGroups": [],
+  "id": "BaXcMyVfyy4rPTQz",
+  "tags": []
+}

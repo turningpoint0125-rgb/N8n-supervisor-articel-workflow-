@@ -1,0 +1,256 @@
+{
+  "name": "R+W+File supervisior",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "2bc18b86-6f39-4839-abc0-87dd6364c984",
+      "name": "When chat message received",
+      "webhookId": "8abf4c23-9945-40b1-acb6-5a1dee738c37"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "## ROLE AND OBJECTIVE\nYou are the Master Orchestrator AI in an n8n multi-agent network. Your sole function is to strictly route execution through a linear, one-way workflow: Researcher -> Content Writer -> Document Compiler.\n\nYou are a coordinator and quality controller. You must NEVER perform research, write the article, or compile the file yourself. Use your connected sub-agent tools to complete each phase.\n\n---\n\n## CRITICAL STATE-TRACKING PROTOCOL\nTo prevent looping, track your progress using this exact logic before selecting a tool:\n- If NO research data exists yet -> You are in PHASE 1. Call the Researcher tool.\n- If research data exists, but NO article draft has been generated -> You are in PHASE 2. Call the Content Writer tool.\n- If a complete article draft exists -> You are in PHASE 3. Call the Document Compiler tool.\n\n---\n\n## OPERATIONAL WORKFLOW PROTOCOL (STRICT SEQUENTIAL ORDER)\n\n### PHASE 1: RESEARCH ACQUISITION\n1. Take the user's initial topic or request.\n2. Call the Researcher Agent tool immediately.\n3. Validate that the response contains research data (topic, summary, key points, statistics, and sources).\n4. HARD RULE: Once you receive this data, PHASE 1 IS COMPLETE. Do not call the Researcher Agent again under any circumstances. Proceed immediately to Phase 2.\n\n### PHASE 2: CONTENT GENERATION\n1. Take the research data payload from Phase 1.\n2. Call the Content Writer Agent tool immediately.\n3. Audit the returned draft against these exact criteria:\n   - Title: Must begin directly with a plain-text title (No '#' or '**' tags).\n   - Length: Approximately 500 words.\n   - Layout: Must include an Introduction, Main Sections (using '###'), Benefits, Conclusion, and References.\n   - Tone: Zero conversational filler or intro text (e.g., do NOT include \"Here is your article\").\n4. Once a valid draft is received, PHASE 2 IS COMPLETE. Proceed immediately to Phase 3.\n\n### PHASE 3: DOCUMENT COMPILATION & DELIVERY\n1. Take the finalized text from Phase 2.\n2. Analyze the document type to decide on the best file format:\n   - Select PDF if it is a final, polished, professional report.\n   - Select Word (.docx) if it serves as an editable template or asset.\n3. Call the corresponding Document Compiler Agent tool to generate the download link.\n\n---\n\n## FINAL RESPONSE DELIVERY\nOnce the compiler tool returns the URL, stop executing tools and output ONLY the final download card to the user in this exact format (do not include conversational text before or after):\n\n---\n### Your Document is Ready\nThe article has been successfully compiled into a professional [PDF/Word] document.\n\n**Download Link:** [Click Here to Download Your Document](Insert_Generated_URL_Here)\n---"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "97540db6-d690-4881-8a6c-4db41fcde055",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "cohere/north-mini-code:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        96,
+        192
+      ],
+      "id": "620d0102-96cf-42f0-af98-666e8454d460",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "u9HUdVJeyFQFbDep",
+          "name": "OpenRouter account 4"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        256
+      ],
+      "id": "e202a5a2-f2b6-4ef3-afba-e6213bf1582d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool FIRST, before any other tool, whenever the user asks you to research, write, or produce a document/article on a topic. Call it exactly once per request to gather raw research data on the given topic.\n\nInput: the topic or subject to research, as a plain string (e.g. \"benefits of intermittent fasting\").\n\nOutput: raw research data including a topic summary, key points, statistics, and sources. Do not call this tool again once you have received this data — treat that as the end of Phase 1 and proceed to writing the article with the Content Writer tool.",
+        "workflowId": {
+          "__rl": true,
+          "value": "HiCp0gocORmrsFpn",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HiCp0gocORmrsFpn",
+          "cachedResultName": "Research workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        112
+      ],
+      "id": "1933ac4a-a0bc-4576-be2a-6a0c373ea3e4",
+      "name": "Call 'Research workflow'"
+    },
+    {
+      "parameters": {
+        "description": " \"Use this tool AFTER research is complete to turn the research data (topic, summary, key points, statistics, sources) into a full written article. Input: the complete research output as a string.\"",
+        "workflowId": {
+          "__rl": true,
+          "value": "BaXcMyVfyy4rPTQz",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/BaXcMyVfyy4rPTQz",
+          "cachedResultName": "writer Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        240
+      ],
+      "id": "1368d29a-6a18-4d19-86e2-3346f780bc7c",
+      "name": "Call 'writer Agent'"
+    },
+    {
+      "parameters": {
+        "description": "\"Use this tool AFTER the article has been written to compile the final article text into a Word/PDF/Google Doc file and return a download link. Input: the finished article content.\"",
+        "workflowId": {
+          "__rl": true,
+          "value": "drc0dYyW0Qy5JaiI",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/drc0dYyW0Qy5JaiI",
+          "cachedResultName": "Generate Docs"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $fromAI('title', ``, 'string') }}",
+            "Content": "={{ $fromAI('Content', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        208
+      ],
+      "id": "4796e038-ae9c-4d37-b09b-6f3a58ec3e2f",
+      "name": "Call 'Generate Docs'1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Research workflow'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'writer Agent'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Generate Docs'1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "463c4453-e1a3-4c2e-9e5a-aa8131943841",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4962de93ae3d529c0b37e2b23247501c8f99ea7a5a1f9a0959aa223fb3492f73"
+  },
+  "nodeGroups": [],
+  "id": "mD5Khzli5rx1LG5N",
+  "tags": []
+}
